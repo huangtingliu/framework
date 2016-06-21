@@ -1,6 +1,11 @@
 package com.huangtl.framework.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,7 +15,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.huangtl.framework.bean.RequestDataBean;
 import com.huangtl.framework.bean.ResponseDataBean;
@@ -161,4 +169,80 @@ public class BaseController {
 			HttpServletResponse response,Model model) throws Exception{
 		return page;
 	}
+	
+	/**
+	 * TODO 单文件上传
+	 * @param imgFile 上传文件
+	 * @return 返回文件名（保存至数据库的路径）
+	 * 作者：黄廷柳
+	 * 2016年6月21日上午10:39:33
+	 */
+	@RequestMapping(value = "/upload")
+	@ResponseBody
+	public String upload(@RequestParam MultipartFile imgFile, HttpServletRequest request,
+			HttpServletResponse response) throws Exception{
+		//uploadUrl的路径webapp/upload
+		String uploadUrl = request.getSession().getServletContext().getRealPath("/")+"/upload/";
+		String fileName = imgFile.getOriginalFilename();
+		String type = fileName.substring(fileName.indexOf(".")+1);
+		
+		
+		File dir = new File(uploadUrl);
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+		
+		String targetFilePath = UUID.randomUUID().toString()+"."+type;
+		//上传后的文件
+		File targetFile = new File(uploadUrl+targetFilePath);
+		if(!targetFile.exists()){
+			targetFile.createNewFile();
+		}
+		
+		//将文件转换到上传文件
+		imgFile.transferTo(targetFile);
+		
+		return targetFilePath;
+	}
+	
+	/**
+	 * TODO 多文件上传
+	 * @return 文件名称集合
+	 * 作者：黄廷柳
+	 * 2016年6月21日上午10:55:35
+	 */
+	@RequestMapping(value="/moreUpload")
+	@ResponseBody
+	public List<Object> moreUplaod(HttpServletRequest request){
+		
+		String uploadUrl = request.getSession().getServletContext().getRealPath("/")+"/upload/";		
+		MultipartHttpServletRequest mreq = (MultipartHttpServletRequest) request;
+		List<MultipartFile> files = mreq.getFiles("file");
+		
+		File dir = new File(uploadUrl);
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+		
+		List<Object> fileList = new ArrayList<Object>();
+		for(MultipartFile f:files){
+			String fileName = f.getOriginalFilename();
+			String type = fileName.substring(fileName.indexOf(".")+1);
+			String targetFilePath = UUID.randomUUID().toString()+"."+type;
+			//上传后的文件
+			File targetFile = new File(uploadUrl+targetFilePath);
+				try {
+					if(!targetFile.exists()){
+						targetFile.createNewFile();
+					}
+					f.transferTo(targetFile);
+					fileList.add(targetFilePath);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		return fileList;
+	}
+	
 }
