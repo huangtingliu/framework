@@ -120,13 +120,13 @@ public class IpUtil {
                 BufferedReader   bufferedreader   =   new   BufferedReader(  
                                 new   InputStreamReader(process.getInputStream()));  
                 String   nextLine;  
-                int num=0;
+               // int num=0;
                 for   (String   line   =   bufferedreader.readLine();   line   !=   null;   line   =   nextLine)   {  
                         nextLine   =   bufferedreader.readLine();  
                         if   (line.indexOf("DNS")   <=   0 )   {  
                                 continue;  
                         } 
-                        num++;
+                       // num++;
 //                        if(num == 3){
                         if(line.indexOf("DNS")   >   0 && line.indexOf("服务器")   >   0){
                         	s   =   line.substring(51-16);
@@ -163,7 +163,7 @@ public class IpUtil {
 //        String startStr = sdf .format(dateStart).toString();
 //        String endStr = sdf .format(dateEnd).toString();
     	
-    	long dayNumber = 0;
+    	//long dayNumber = 0;
     	long DAY = 24L * 60L * 60L;
     	long month = DAY * 30L;
     	long between = (dateEnd.getTime()-dateStart.getTime())/1000; //得到秒
